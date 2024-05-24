@@ -111,7 +111,8 @@ Returns the updated profile details of the authenticated user.
 To set up and run the application locally:
 1. Clone the repository.
 2. Install the dependencies using `npm install`.
-3. Start the NestJS application with `npm run start`.
-4. The application will be available at `http://localhost:3005`.
+3. Execute DB migrations `npm run migrate`.
+4. Start the NestJS application with `npm run start`.
+5. The application will be available at `http://localhost:3005`.
 
 For more detailed instructions, please refer to the NestJS documentation or the project-specific setup guide.

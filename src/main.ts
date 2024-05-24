@@ -6,7 +6,7 @@ dotenv.config({ path: '../../.env' });
 import * as admin from 'firebase-admin';
 import * as serviceAccount from './service-key.json';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
+const port = process.env.PORT || 3000;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -27,8 +27,8 @@ async function bootstrap() {
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
   });
 
-  console.log('App started: 3000');
+  console.log(`App started: ${port}`);
 
-  await app.listen(3005);
+  await app.listen(port);
 }
 bootstrap();

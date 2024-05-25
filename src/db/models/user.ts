@@ -5,7 +5,6 @@ export class User extends Model {
   phoneNumber: string;
   email: string;
   name: string;
-  password: string;
   roleId: string;
   profilePhoto: string;
   roleType: string;

@@ -8,7 +8,6 @@ import {
   Query,
   Res,
   HttpStatus,
-  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './create-user.dto';
@@ -20,7 +19,7 @@ import {
   ApiBody,
   ApiTags,
   ApiQuery,
-  ApiHeader,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 @ApiTags('Users')
@@ -32,11 +31,7 @@ export class UserController {
   @Post()
   @ApiOperation({ summary: 'Onboard a user' })
   @ApiBody({ type: CreateUserDto, required: true })
-  @ApiHeader({
-    name: 'authorization',
-    description: 'Bearer Token',
-    required: true,
-  })
+  @ApiBearerAuth('access-token')
   async create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     let response: any = await this.userService.findAdmin();
     if (response?.errors) {
@@ -65,11 +60,7 @@ export class UserController {
   @Get('me')
   @ApiOperation({ summary: 'Get User Profile' })
   @ApiQuery({ type: 'string', required: true, name: 'userId' })
-  @ApiHeader({
-    name: 'authorization',
-    description: 'Bearer Token',
-    required: true,
-  })
+  @ApiBearerAuth('access-token')
   async getProfile(@Query('userId') userId: string, @Res() res: Response) {
     const user: any = await this.userService.findOne(userId);
 
@@ -84,16 +75,23 @@ export class UserController {
   @ApiOperation({ summary: 'Update user profile' })
   @ApiBody({ type: UpdateUserDto, required: true })
   @ApiQuery({ type: 'string', required: true, name: 'userId' })
-  @ApiHeader({
-    name: 'authorization',
-    description: 'Bearer Token',
-    required: true,
-  })
+  @ApiBearerAuth('access-token')
   async updateProfile(
     @Query('userId') userId: string,
     @Body() updateUserDto: UpdateUserDto,
     @Res() res: Response,
   ) {
+    if (updateUserDto.base64 && updateUserDto.url) {
+      return res.status(HttpStatus.BAD_REQUEST).send({
+        errors: [
+          {
+            type: 'Bad Request',
+            message: 'Provide either a base64 string or a URL, not both',
+          },
+        ],
+      });
+    }
+
     const response: any = await this.userService.update(userId, updateUserDto);
     if (response && response?.data) {
       return res.status(HttpStatus.OK).send(response);
@@ -106,15 +104,11 @@ export class UserController {
   @Get()
   @ApiOperation({ summary: 'Fetch all users' })
   @ApiQuery({ type: 'string', required: true, name: 'userId' })
-  @ApiHeader({
-    name: 'authorization',
-    description: 'Bearer Token',
-    required: true,
-  })
+  @ApiBearerAuth('access-token')
   async getAllProfiles(
     @Query('userId') userId: string,
     @Res() res: Response,
-    @Req() req: Request,
+    // @Req() req: Request,
   ) {
     const user: any = await this.userService.findOne(userId);
     let response;

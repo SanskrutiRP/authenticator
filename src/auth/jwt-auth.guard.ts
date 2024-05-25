@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from 'src/user/user.service';
 
@@ -11,10 +11,13 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request.headers['authorization']?.split(' ')[1];
-    if (!token) {
-      return false;
+    const authorization = request.headers.authorization;
+
+    if (!authorization) {
+      throw new UnauthorizedException('Authorization header not found');
     }
+
+    const token = authorization.split(' ')[1];
     try {
       const decodedToken = await this.authService.verifyToken(token);
 

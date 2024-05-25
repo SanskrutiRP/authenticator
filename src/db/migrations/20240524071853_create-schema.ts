@@ -31,9 +31,8 @@ exports.up = async function (knex) {
       table.string('name').notNull();
       table.string('phone_number').notNull();
       table.text('bio').notNull();
-      table.string('email').notNull();
-      table.text('password');
-      table.text('token');
+      table.string('email').notNull().unique();
+      table.text('token').unique();
       table.text('profile_photo');
       table.enum('profile_type', ['public', 'private']).defaultTo('private');
       table
@@ -52,7 +51,6 @@ exports.up = async function (knex) {
     name: 'admin',
     bio: 'i am admin',
     email: 'admin@gmail.com',
-    password: 'abc',
     role_id: adminRole[0]?.public_id,
     profile_type: 'private',
     phone_number: '9214355567',

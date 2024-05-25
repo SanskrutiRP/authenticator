@@ -4,6 +4,7 @@ import { UpdateUserDto } from './update-user.dto';
 import { User } from 'src/db/models/user';
 import { Role } from 'src/db/models/role';
 import { Errors, ResponseObject } from 'src/error.dto';
+import * as admin from 'firebase-admin';
 
 @Injectable()
 export class UserService {
@@ -17,7 +18,12 @@ export class UserService {
       const getUserRole = await Role.query().findOne('roleType', 'USER');
 
       const payloadToInsert = {
-        ...createUserPayload,
+        token: createUserPayload?.token,
+        email: createUserPayload?.email,
+        name: createUserPayload?.name,
+        bio: createUserPayload?.bio,
+        profilePhoto: createUserPayload?.base64 || createUserPayload?.url,
+        phoneNumber: createUserPayload?.phoneNumber,
         roleId: getUserRole?.publicId,
       };
       const response = await User.query().insert(payloadToInsert);
@@ -93,11 +99,22 @@ export class UserService {
     try {
       this.logger.log(`request received:: ${updateUserDto}`);
 
-      const userExists = await this.findOne(userId);
+      const userExists: any = await this.findOne(userId);
 
+      if (userExists?.errors) {
+        return userExists.errors;
+      }
+      const updatePayload = {
+        bio: updateUserDto?.bio,
+        profileType: updateUserDto?.profileType,
+        profilePhoto: updateUserDto?.url,
+      };
+      if (updateUserDto?.base64) {
+        // TODO:: implement image upload here
+      }
       if (userExists) {
         const response = await User.query()
-          .patch(updateUserDto)
+          .patch(updatePayload)
           .where('publicId', userId);
 
         this.logger.debug(`sending response:: ${response}`);
@@ -202,5 +219,23 @@ export class UserService {
         ],
       };
     }
+  }
+
+  private async uploadBase64Image(
+    base64Image: string,
+    userId: string,
+  ): Promise<string> {
+    const bucket = admin.storage().bucket();
+    const file = bucket.file(`profile_pictures/${userId}.jpg`);
+
+    const buffer = Buffer.from(base64Image.split(',')[1], 'base64');
+
+    await file.save(buffer, {
+      metadata: { contentType: 'image/jpeg' },
+      public: true,
+    });
+
+    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+    return publicUrl;
   }
 }

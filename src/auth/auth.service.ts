@@ -1,4 +1,4 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { UserService } from '../user/user.service';
 import { User } from 'src/db/models/user';
@@ -17,19 +17,29 @@ export class AuthService {
   async checkUser(token, payload): Promise<User | any> {
     try {
       const decodedToken = await this.verifyToken(token);
-      const user = await this.userService.findToken(decodedToken.uid);
+      const user: any = await this.userService.findToken(decodedToken.uid);
+      const insertPayload = {
+        token: decodedToken?.uid || user?.token,
+        email: decodedToken?.email || payload?.email || user?.email,
+        name: decodedToken?.name || payload?.name || user?.name,
+        bio: payload?.bio || user?.bio || '',
+        profilePhoto:
+          decodedToken?.picture ||
+          payload?.url ||
+          payload?.base64 ||
+          user?.profilePhoto,
+        phoneNumber:
+          decodedToken?.phone_number ||
+          payload?.phoneNumber ||
+          user?.phoneNumber,
+      };
       if (!user) {
-        await this.userService.create({
-          token: decodedToken?.uid,
-          email: decodedToken?.email || payload?.email,
-          name: decodedToken?.name || payload?.name,
-          bio: payload?.bio || '',
-          profilePhoto: decodedToken?.picture || payload?.url,
-          phoneNumber: decodedToken?.phone_number || payload?.phoneNumber,
-        });
+        await this.userService.create(insertPayload);
       }
 
-      return decodedToken;
+      return {
+        data: insertPayload,
+      };
     } catch (error) {
       this.logger.error(error.message);
 
@@ -42,23 +52,5 @@ export class AuthService {
         ],
       };
     }
-  }
-
-  private async uploadBase64Image(
-    base64Image: string,
-    userId: string,
-  ): Promise<string> {
-    const bucket = admin.storage().bucket();
-    const file = bucket.file(`profile_pictures/${userId}.jpg`);
-
-    const buffer = Buffer.from(base64Image.split(',')[1], 'base64');
-
-    await file.save(buffer, {
-      metadata: { contentType: 'image/jpeg' },
-      public: true,
-    });
-
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
-    return publicUrl;
   }
 }

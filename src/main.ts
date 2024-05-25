@@ -6,29 +6,34 @@ dotenv.config({ path: '../../.env' });
 import * as admin from 'firebase-admin';
 import * as serviceAccount from './service-key.json';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-const port = process.env.PORT || 3000;
+import { json, urlencoded } from 'express';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // setup swagger configuration/ structure base document that conforms to the OpenAPI Specification
   const config = new DocumentBuilder()
-    .setTitle('Voosh')
-    .setDescription('Voosh Authentication API documentation')
-    .setVersion('1.0.0')
-    .addBearerAuth()
+    .setTitle('Authenticator API')
+    .setDescription('API documentation for the Authenticator application')
+    .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token',
+    ) 
     .build();
-
-  //  create a full document (with all HTTP routes defined)
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+
   app.enableCors();
+  app.use(json({ limit: '150mb' }));
+  app.use(urlencoded({ extended: true, limit: '150mb' }));
+
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
   });
 
-  console.log(`App started: ${port}`);
+  console.log('App started: 3000');
 
-  await app.listen(port);
+  await app.listen(3005);
 }
 bootstrap();

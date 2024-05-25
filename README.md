@@ -24,4 +24,9 @@ The platform supports two roles:
 - **User**: Regular user with standard access.
 - **Admin**: Administrative user with elevated privileges.
 
+
+
+https://github.com/SanskrutiRP/authenticator/assets/67673060/0b887d57-9aa0-4c3f-a6e9-738c2472a499
+
+
 ---

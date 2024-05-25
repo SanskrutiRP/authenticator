@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsEmail, IsMobilePhone } from 'class-validator';
+import { IsString, IsEmail, IsMobilePhone, IsOptional, Matches, IsUrl } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({
     type: 'string',
     description: 'token',
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   token: string;
 
@@ -15,13 +15,14 @@ export class CreateUserDto {
     description: 'EmailId',
   })
   @IsEmail()
-  @IsNotEmpty()
+  @IsOptional()
   email: string;
 
   @ApiProperty({
     type: 'string',
     description: 'Name',
   })
+  @IsOptional()
   @IsString()
   name: string;
 
@@ -29,20 +30,25 @@ export class CreateUserDto {
     type: 'string',
     description: 'Phone Number',
   })
+  @IsOptional()
   @IsMobilePhone('en-IN')
   phoneNumber: string;
 
-  @ApiProperty({
-    type: 'string',
-    description: 'Profile Photo',
+  @IsOptional()
+  @Matches(/^data:image\/[a-z]+;base64,[A-Za-z0-9+/=]+$/, {
+    message: 'Invalid base64 format',
   })
-  @IsString()
-  profilePhoto: string;
+  base64?: string;
+
+  @IsOptional()
+  @IsUrl()
+  url?: string;
 
   @ApiProperty({
     type: 'string',
     description: 'Bio',
   })
+  @IsOptional()
   @IsString()
   bio: string;
 }

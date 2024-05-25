@@ -25,7 +25,10 @@ The platform supports two roles:
 - **Admin**: Administrative user with elevated privileges.
 
 
+## Sequence Diagram
+![authenticator](https://github.com/SanskrutiRP/authenticator/assets/67673060/441c2a38-4f84-48f1-8e66-997161ddb9e2)
 
+## Demo video
 https://github.com/SanskrutiRP/authenticator/assets/67673060/0b887d57-9aa0-4c3f-a6e9-738c2472a499
 
 

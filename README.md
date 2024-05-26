@@ -31,5 +31,8 @@ The platform supports two roles:
 ## Demo video
 https://github.com/SanskrutiRP/authenticator/assets/67673060/0b887d57-9aa0-4c3f-a6e9-738c2472a499
 
+## Postman collection
+
+[auth.postman_collection.json](https://github.com/SanskrutiRP/authenticator/files/15446931/auth.postman_collection.json)
 
 ---
